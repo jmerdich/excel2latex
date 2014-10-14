@@ -35,7 +35,7 @@
       return strings;
     },
 
-    toLatex: function(table) {
+    toLatex: function(id, table) {
       var max = 0;
       for(var i=0; i < table.length; i++) {
         if(table[i] && table[i].length > max) { max = table[i].length; }
@@ -47,7 +47,7 @@
         args[i] = 'c';
       }
       args = '@{} ' + args.join(' ') + ' @{}';
-      var latex = "\\begin{" + excelParser.latexEnvironment + "}{" + args + "}\n\\toprule\n";
+      var latex = "\\begin{table}\n\\centering\n\\begin{" + excelParser.latexEnvironment + "}{" + args + "}\n\\toprule\n";
       for(i=0; i < table.length; i++) {
         var cols = table[i];
         // TODO: replace "&" with "\&"
@@ -64,7 +64,7 @@
       }
       latex += "\\bottomrule"
       latex += "\\end{" + excelParser.latexEnvironment + "}\n";
-      
+      latex += "\\caption{" + id + "}\n\\label{" + id + "}\n\\end{table}\n"
       return latex;
     },
 
@@ -129,7 +129,7 @@
           
           sheet.getData(new zip.TextWriter(), function(text) {
             var table = excelParser.processSheet(text, stringTable);
-            var latex = excelParser.toLatex(table);
+            var latex = excelParser.toLatex(id, table);
             latexOutput[id] = latex;
             
             // I apologize for the hack :(

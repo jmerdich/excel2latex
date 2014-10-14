@@ -44,10 +44,10 @@
       var numCols = max;
       var args = [];
       for(i=0; i < numCols; i++) {
-        args[i] = 'l';
+        args[i] = 'c';
       }
-      args = ' | ' + args.join(' | ') + ' | ';
-      var latex = "\\begin{" + excelParser.latexEnvironment + "}{" + args + "}\n\\hline\n";
+      args = '@{} ' + args.join(' ') + ' @{}';
+      var latex = "\\begin{" + excelParser.latexEnvironment + "}{" + args + "}\n\\toprule\n";
       for(i=0; i < table.length; i++) {
         var cols = table[i];
         // TODO: replace "&" with "\&"
@@ -59,9 +59,10 @@
         }
 
         latex += "\t" + cols.join(' & ');
-        latex += " \\\\ \\hline\n";
+        if (i==0) {latex += " \\\\ \\midrule\n";}
+        else {latex += " \\\\ \n";
       }
-
+      latex += "\\bottomrule"
       latex += "\\end{" + excelParser.latexEnvironment + "}\n";
       
       return latex;

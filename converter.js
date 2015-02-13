@@ -8,9 +8,6 @@
   var latexOutput = {};
 
   var excelParser = {
-    //latexEnvironment: 'tabular',
-    latexEnvironment: 'array',
-
     latexEscape: function(text) {
       var escapeRegExpr = function(str) {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
@@ -35,7 +32,7 @@
       return strings;
     },
 
-    toLatex: function(id, table) {
+    toLatex: function(table) {
       var max = 0;
       for(var i=0; i < table.length; i++) {
         if(table[i] && table[i].length > max) { max = table[i].length; }
@@ -44,10 +41,10 @@
       var numCols = max;
       var args = [];
       for(i=0; i < numCols; i++) {
-        args[i] = 'c';
+        args[i] = 'l';
       }
-      args = '@{} ' + args.join(' ') + ' @{}';
-      var latex = "\\begin{table}\n\\centering\n\\begin{" + excelParser.latexEnvironment + "}{" + args + "}\n\\toprule\n";
+      args = ' | ' + args.join(' | ') + ' | ';
+      var latex = "\\begin{tabular}{" + args + "}\n\\hline\n";
       for(i=0; i < table.length; i++) {
         var cols = table[i];
         // TODO: replace "&" with "\&"
@@ -59,12 +56,11 @@
         }
 
         latex += "\t" + cols.join(' & ');
-        if (i==0) {latex += " \\\\ \\midrule\n";}
-        else {latex += " \\\\ \n";
+        latex += " \\\\ \\hline\n";
       }
-      latex += "\\bottomrule"
-      latex += "\\end{" + excelParser.latexEnvironment + "}\n";
-      latex += "\\caption{" + id + "}\n\\label{" + id + "}\n\\end{table}\n"
+
+      latex += "\\end{tabular}\n";
+      
       return latex;
     },
 
@@ -129,23 +125,16 @@
           
           sheet.getData(new zip.TextWriter(), function(text) {
             var table = excelParser.processSheet(text, stringTable);
-            var latex = excelParser.toLatex(id, table);
+            var latex = excelParser.toLatex(table);
             latexOutput[id] = latex;
             
             // I apologize for the hack :(
             if(id === '1') {
-              excelParser.showOutput(1);
+              $('#latex-output').val(latex);
             }
           });
         });
       });
-    },
-
-    showOutput: function(id) {
-      var latex = latexOutput[id];
-      $('#latex-output').val(latex);
-      $('#preview').html('$$\n' + latex + '\n$$');
-      MathJax.Hub.Typeset("preview");
     },
 
     handleFiles: function(event) {
@@ -213,7 +202,8 @@
       // when a new workbook is selected, do stuff!
       $('#workbook').change(function(event) {
         var select = $(event.target);
-        excelParser.showOutput(select.val());
+        var output = latexOutput[select.val()];
+        $('#latex-output').val(output);
       });
     }
   };
